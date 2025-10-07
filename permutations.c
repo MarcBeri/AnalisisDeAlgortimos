@@ -15,6 +15,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
+#include <limits.h>
 
 /***************************************************/
 /* Function: random_num Date:   19-09-2025         */
@@ -30,19 +31,57 @@
 /* Output:                                         */
 /* int: random number                              */
 /***************************************************/
+/*
 int random_num(int inf, int sup)
 {
-  int random = 0;
-
+  unsigned long random = 0;
+  long rand_max ;
+rand_max = (long)RAND_MAX+1;
   if(inf > sup || inf < 0 || sup < 0){
     printf("Hay algún error en los datos introducidos.");
     return ERR;
   }
 
-  random = inf + (((sup - inf + 1) * rand()) / (RAND_MAX + 1));
+  random = inf + rand()/((rand_max/(sup - inf + 1)) + 1);
 
   return random;
 }
+*/
+
+
+int random_num(int inf, int sup) {
+
+  if (inf > sup){ 
+    return ERR;
+  }
+  unsigned long range = (unsigned long)(sup - inf) + 1UL;
+  unsigned long N = (unsigned long)RAND_MAX + 1UL;
+  if (range == 0){ 
+    return ERR;
+  }
+  unsigned long limit = N - (N % range);
+  unsigned long r;
+  
+  do {
+    r = (unsigned long) rand();
+  } while (r >= limit);
+
+  return inf + (int)(r % range);
+}
+
+/*
+int random_num_unbiased(int inf, int sup) {
+    if (inf > sup) return -1;
+    unsigned long range = (unsigned long)(sup - inf) + 1UL;
+    unsigned long N = (unsigned long)RAND_MAX + 1UL;
+    unsigned long limit = N - (N % range);
+    unsigned long r;
+    do {
+        r = (unsigned long) rand();
+    } while (r >= limit);
+    return inf + (int)(r % range);
+}
+*/
 
 /*return rand()/(RAND_MAX+1.)*(sup-inf+1)+inf;*/
 
@@ -60,7 +99,7 @@ int random_num(int inf, int sup)
 /* or NULL in case of error                        */
 /***************************************************/
 
-int* genera_perm(int N){
+int* generate_perm(int N){
   int i, j, aux;
   int *perm = NULL;
 
@@ -117,7 +156,7 @@ int** generate_permutations(int n_perms, int N)
   }
 
   for(i=0;i<n_perms;i++){
-    perms[i] = genera_perm(N);
+    perms[i] = generate_perm(N);
 
     if(perms[i]==NULL){
       for(j=0;j<=i;j++){
