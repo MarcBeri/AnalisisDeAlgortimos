@@ -19,6 +19,7 @@
 int InsertSort(int* array, int ip, int iu)
 {
   int i, j, aux, count = 0;
+  int flag = ERR;
 
   for (i = ip + 1; i <= iu; i++) {
     aux = array[i];
@@ -42,16 +43,22 @@ int InsertSort(int* array, int ip, int iu)
 /***************************************************/
 int BubbleSort(int* array, int ip, int iu)
 {
+  int flag = ERR;
   int count = 0;
   int i, j, aux;
   for(i = ip ; i < iu ; i++){
+    flag = ERR;
     for(j = ip+1 ; j <= iu-i ; j++){
       if(array[j-1] > array[j]){
         count++;
         aux = array[j-1];
         array[j-1] = array[j];
         array[j] = aux;
+        flag = OK;
       }
+    }
+    if(flag == OK){
+      return count;
     }
   }
   return count;

@@ -35,8 +35,8 @@ int main(int argc, char** argv)
   }
 
   printf("Practice number 1, section 3\n");
-  printf("Done by: your names\n");
-  printf("Group: Your group\n");
+  printf("Done by: Mario Rodríguez y Marcos Berigüete\n");
+  printf("Group: 5\n");
 
 
   /* check command line la linea de comandos */
