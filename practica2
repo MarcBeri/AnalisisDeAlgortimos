@@ -1,0 +1,165 @@
+import numpy as np
+import queue
+from queue import PriorityQueue
+import random
+import time
+import statistics
+from typing import List, Tuple
+
+# ==========================================================
+# I. TAD CONJUNTO DISJUNTO
+# ==========================================================
+
+# I-A.1. Inicialización del Conjunto Disjunto
+def init_cd(n: int) -> np.ndarray:
+    """
+    Devuelve un array de NumPy con valores -1 en las posiciones {0, ..., n-1}.
+    """
+    return np.full(n, -1, dtype=int)
+
+# I-A.2. Unión de dos conjuntos por rango
+def union(rep_1: int, rep_2: int, p_cd: np.ndarray) -> int:
+    """
+    Devuelve el representante del conjunto obtenido como la unión por rangos
+    de los conjuntos representados por rep_1 y rep_2.
+    """
+    # Si ya pertenecen al mismo conjunto, no se hace nada.
+    if rep_1 == rep_2:
+        return rep_1
+    
+    # El rango es el valor absoluto del número negativo.
+    # Un valor más negativo indica un rango mayor.
+    if p_cd[rep_1] < p_cd[rep_2]:  # El árbol de rep_1 es más alto
+        p_cd[rep_2] = rep_1
+        return rep_1
+    elif p_cd[rep_2] < p_cd[rep_1]:  # El árbol de rep_2 es más alto
+        p_cd[rep_1] = rep_2
+        return rep_2
+    else:  # Ambos tienen la misma altura
+        # Se elige rep_1 como nuevo padre y su rango (altura) aumenta en 1.
+        p_cd[rep_2] = rep_1
+        p_cd[rep_1] -= 1
+        return rep_1
+
+# I-A.3. Búsqueda del representante con compresión de caminos
+def find(ind: int, p_cd: np.ndarray) -> int:
+    """
+    Devuelve el representante del índice 'ind' realizando compresión de caminos.
+    """
+    # Si el valor es negativo, 'ind' es la raíz (el representante).
+    if p_cd[ind] < 0:
+        return ind
+    else:
+        # Se busca recursivamente al representante y, a la vuelta de la recursión,
+        # se asigna directamente como padre de 'ind' (compresión de caminos).
+        representante = find(p_cd[ind], p_cd)
+        p_cd[ind] = representante
+        return representante
+
+# ==========================================================
+# II. ÁRBOLES ABARCADORES
+# ==========================================================
+
+# II-A.1. Creación de la Cola de Prioridad
+def create_pq(n: int, l_g: List) -> queue.PriorityQueue:
+    """
+    Inserta las ramas del grafo (n, l_g) en una cola de prioridad y la devuelve.
+    """
+    pq = PriorityQueue()
+    for u, v, w in l_g:
+        pq.put((w, (u, v)))
+    return pq
+
+# II-A.2. Algoritmo de Kruskal
+def kruskal(n: int, l_g: List) -> Tuple[int, List] or None:
+    """
+    Devuelve un árbol abarcador mínimo (AAM) para el grafo (n, l_g).
+    Si el grafo no es conexo, devuelve None.
+    """
+    cd = init_cd(n)
+    pq = create_pq(n, l_g)
+    
+    l_t = []          # Lista de aristas del AAM
+    total_weight = 0
+    num_edges = 0
+    
+    # El bucle se detiene cuando el AAM está completo (n-1 aristas) o la cola se vacía
+    while not pq.empty() and num_edges < n - 1:
+        peso, (u, v) = pq.get()
+        
+        rep_u = find(u, cd)
+        rep_v = find(v, cd)
+        
+        # Si no están en el mismo conjunto, no forman un ciclo
+        if rep_u != rep_v:
+            union(rep_u, rep_v, cd)
+            l_t.append((u, v, peso))
+            total_weight += peso
+            num_edges += 1
+            
+    # El AAM solo existe si se han añadido n-1 aristas (grafo conexo)
+    if num_edges == n - 1:
+        return (total_weight, l_t)
+    else:
+        return None
+
+# II-B.1. Generador de Grafos Completos
+def complete_graph(n_nodes: int, max_weight=50) -> Tuple[int, List]:
+    """
+    Genera un grafo completo con n_nodes nodos, aristas (u, v) con u < v
+    y pesos aleatorios entre 1 y max_weight.
+    """
+    l_g = []
+    for u in range(n_nodes):
+        for v in range(u + 1, n_nodes):
+            peso = random.randint(1, max_weight)
+            l_g.append((u, v, peso))
+    return n_nodes, l_g
+
+# II-B.2. Medidor de Tiempos de Ejecución
+def time_kruskal(n_graphs: int, n_nodes_ini: int, n_nodes_fin: int, step: int) -> List[float]:
+    """
+    Genera n_graphs grafos completos para cada tamaño y devuelve una lista
+    con los tiempos medios de ejecución de Kruskal.
+    """
+    node_counts = range(n_nodes_ini, n_nodes_fin + 1, step)
+    mean_times = []
+    
+    print(f"Iniciando medición de tiempos (Nº de muestras por tamaño: {n_graphs})...")
+    
+    for n in node_counts:
+        times = []
+        for _ in range(n_graphs):
+            # Preparar datos: generar un nuevo grafo aleatorio
+            num_nodes, graph_edges = complete_graph(n)
+            
+            # Medir tiempo de una sola ejecución
+            start = time.perf_counter()
+            kruskal(num_nodes, graph_edges)
+            end = time.perf_counter()
+            
+            times.append(end - start)
+            
+        # Calcular la media de los tiempos y añadirla a la lista de resultados
+        mean_times.append(statistics.mean(times))
+        print(f"  - Nodos: {n}, Tiempo medio: {mean_times[-1]:.5f} s")
+
+    print("Medición finalizada.")
+    return mean_times
+
+# --- Ejemplo de Uso (Corregido) ---
+if __name__ == '__main__':
+    print("--- Probando la Parte II-B ---")
+    
+    # Obtenemos los tiempos de la función
+    tiempos = time_kruskal(
+        n_graphs=5,
+        n_nodes_ini=50,
+        n_nodes_fin=150,
+        step=50
+    )
+    # Lo que va a hacer es devolver el tiempo medio para el total de los grafos, con n nodos.
+    print("\nLista de tiempos medios devuelta por la función:")
+    
+    # Imprimimos la lista original de números, sin convertirla a texto
+    print(tiempos)
