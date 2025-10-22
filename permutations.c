@@ -33,18 +33,21 @@
 /***************************************************/
 
 int random_num(int inf, int sup) {
+  
+  unsigned long range = (unsigned long)(sup - inf) + 1UL;
+  unsigned long N = (unsigned long)RAND_MAX + 1UL;
+
+  unsigned long limit = N - (N % range);
+  unsigned long r;
 
   if (inf > sup){ 
     return ERR;
   }
-  unsigned long range = (unsigned long)(sup - inf) + 1UL;
-  unsigned long N = (unsigned long)RAND_MAX + 1UL;
+
   if (range == 0){ 
     return ERR;
   }
-  unsigned long limit = N - (N % range);
-  unsigned long r;
-  
+
   do {
     r = (unsigned long) rand();
   } while (r >= limit);

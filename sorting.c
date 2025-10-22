@@ -19,7 +19,6 @@
 int InsertSort(int* array, int ip, int iu)
 {
   int i, j, aux, count = 0;
-  int flag = ERR;
 
   for (i = ip + 1; i <= iu; i++) {
     aux = array[i];

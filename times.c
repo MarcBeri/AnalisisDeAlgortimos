@@ -28,7 +28,8 @@ short average_sorting_time(pfunc_sort metodo,
                               int N, 
                               PTIME_AA ptime)
 {
-  clock_t start_t, end_t, total_t;
+  clock_t start_t, end_t;
+  double total_t;
   int i, total_ob = 0, max_ob, min_ob, ob;
   int** perms=NULL;
 
@@ -140,7 +141,8 @@ short save_time_table(char* file, PTIME_AA ptime, int n_times)
   }
 
   for(i=0; i < n_times; i++){
-    fprintf(f," %d | %.2f | %.2f | %d | %d\n", ptime[i].N, ptime[i].time, ptime[i].average_ob, ptime[i].max_ob, ptime[i].min_ob);
+    fprintf(f," %d | %f | %f | %d | %d\n", ptime[i].N, ptime[i].time, 
+            ptime[i].average_ob, ptime[i].max_ob, ptime[i].min_ob);
   }
 
   fclose(f);
